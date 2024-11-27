@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include <stdexcept>
 
 using namespace std;
 
@@ -104,8 +103,7 @@ class Location
 {
 public:
     virtual ~Location() {}
-    bool operator<(Location const& other) const
-    { return (string)(*this) < (string)(other); }
+    bool operator<(Location const& other) const { return (string)(*this) < (string)(other); }
     virtual operator string() const = 0;
     virtual string to_string() const = 0;
 };
@@ -141,7 +139,12 @@ public:
 };
 
 typedef pair<FromLocation, ToLocation> Route;
-#define make_route make_pair
+Route
+make_route(
+    FromLocation from, 
+    ToLocation to
+)
+{ return make_pair(from, to); }
 string const distance_map_filename = "distance.csv";
 class RouteToDistance
 {
@@ -162,7 +165,9 @@ public:
 } const route_to_distance;
 
 map<RouteToDistance::RouteType, RouteToDistance::DistanceType> 
-RouteToDistance::distance_map_init(string const& distance_map_filename)
+RouteToDistance::distance_map_init(
+    string const& distance_map_filename
+)
 {
     map<RouteToDistance::RouteType, RouteToDistance::DistanceType> distance_map;
     ifstream distance_map_stream(distance_map_filename.c_str());
@@ -178,7 +183,6 @@ RouteToDistance::distance_map_init(string const& distance_map_filename)
     csv::Parser distance_map_parser(distance_map_title_line);
     distance_map_parser.add_records(file_buffer);
 
-
     for (size_t i = 0; i < distance_map_parser.record_count(); ++i) {
         string const& from_city = distance_map_parser.field_at(i, 0);
         string const& to_city = distance_map_parser.field_at(i, 1);
@@ -192,8 +196,7 @@ RouteToDistance::distance_map_init(string const& distance_map_filename)
     return distance_map;
 }
 
-map<RouteToDistance::RouteType, RouteToDistance::DistanceType> const 
-RouteToDistance::distance_map = RouteToDistance::distance_map_init(distance_map_filename);
+map<RouteToDistance::RouteType, RouteToDistance::DistanceType> const RouteToDistance::distance_map = RouteToDistance::distance_map_init(distance_map_filename);
 
 class Centimeter
 {
