@@ -5,43 +5,113 @@ using namespace std;
 namespace csv
 {
 
+/*!
+ *  @brief  `csv::Parser` is the type that parse the CSV file and store the data in a structured way.
+ */
 class Parser
 {
   private:
+    /*!
+     * @brief   `csv::Parser::record_type` is a vector of strings that represents the fields in a line in the CSV file.
+     */
     typedef vector<string> record_type;
+    /*!
+     * @brief   `csv::Parser::title_type` is a vector of strings that represents the title fields in the CSV file.
+     */
     typedef vector<string> title_type;
+    /*!
+     * @brief   `csv::Parser::m_title_fields` is a vector of strings that stores the title fields in the CSV file.
+     */
     title_type m_title_fields;
+    /*!
+     * @brief   `csv::Parser::m_data` is a vector of `record_type` that stores the data in the CSV file.
+     */
     vector<record_type> m_data;
 
+    /*!
+     * @brief   `csv::Parser::string_trim_result` is a struct that stores two iterators of the trimmed string.
+     * @details It stores the `begin` and the `end` of the trimmed string.
+     */
     struct string_trim_result
     {
         string::const_iterator begin, end;
     };
-
+    /*!
+     * @brief   `csv::Parser::string_trim` is a function that trims the string from the beginning and the end.
+     * @details It trims the string from the beginning and the end by removing the leading and trailing whitespaces.
+     * @param   string_begin The beginning of the string
+     * @param   string_end The end of the string
+     * @return  `csv::Parser::string_trim_result` The trimmed string
+     */
     static string_trim_result string_trim(string::const_iterator string_begin, string::const_iterator string_end);
+    /*!
+     * @brief   `csv::Parser::parse_line` is a function that parses a line in the CSV file.
+     * @details It parses a line in the CSV file and returns a vector of strings that represents the fields in the line.
+     * @param   line_begin The beginning of the line
+     * @param   line_end The end of the line
+     * @return  `csv::Parser::record_type` The fields in the line
+     * @throws  `std::runtime_error` If the field is not enclosed in double quotes
+     */
     static record_type parse_line(string::const_iterator line_begin, string::const_iterator line_end);
 
   public:
-    Parser(string const &title_line) : m_title_fields(parse_line(title_line.begin(), title_line.end())), m_data()
-    {
-    }
+    /*!
+     * @brief   `csv::Parser::Parser` is a constructor that initializes the `csv::Parser` object.
+     * @details It initializes the `csv::Parser` object with the title line in the CSV file.
+     * @param   title_line The title line in the CSV file
+     */
+    Parser(string const &title_line) 
+        : m_title_fields(parse_line(title_line.begin(), title_line.end()))
+        , m_data()
+    {}
+    /*!
+     * @brief   `csv::Parser::add_records` is a function that adds the records in the CSV file.
+     * @details It adds the records in the CSV file by parsing the data string and storing the data in the structured way.
+     *          It also checks if the title line in the CSV file matches the title fields in the `csv::Parser` object.
+     * @param   data_str The string that contains the data in the CSV file
+     */
     void add_records(string const &data_str);
+    /*!
+     * @brief   `csv::Parser::titles` is a function that returns the title fields in the CSV file.
+     * @return  `csv::Parser::title_type const &` The title fields in the CSV file
+     */
     title_type const &titles() const
     {
         return m_title_fields;
     }
+    /*!
+     * @brief   `csv::Parser::record_at` is a function that returns the record at the specified index.
+     * @param   index The index of the record
+     * @return  `csv::Parser::record_type const &` The record at the specified index
+     * @throws  `std::out_of_range` If the index is more than `record_count()`
+     */
     record_type const &record_at(size_t index) const
     {
         return m_data.at(index);
     }
+    /*!
+     * @brief   `csv::Parser::field_at` is a function that returns the field at the specified index in the record at the specified index.
+     * @param   record_index The index of the record
+     * @param   field_index The index of the field
+     * @return  `std::string const &` The field at the specified index in the record at the specified index
+     * @throws  `std::out_of_range` If the index is more than `record_count()` or `field_count()`
+     */
     string const &field_at(size_t record_index, size_t field_index) const
     {
         return record_at(record_index).at(field_index);
     }
+    /*!
+     * @brief   `csv::Parser::record_count` is a function that returns the number of records in the CSV file.
+     * @return  `std::size_t` The number of records in the CSV file
+     */
     size_t record_count() const
     {
         return m_data.size();
     }
+    /*!
+     * @brief   `csv::Parser::field_count` is a function that returns the number of fields in the CSV file.
+     * @return  `std::size_t` The number of fields in the CSV file
+     */
     size_t field_count() const
     {
         return m_title_fields.size();
@@ -111,66 +181,147 @@ void Parser::add_records(string const &data_str)
 namespace mail
 {
 
+/*!
+ * @brief   `mail::Location` is an abstract class that represents a location.
+ */
 class Location
 {
   public:
+    /*!
+     * @brief   `mail::Location::~Location` is a pure virtual destructor of the `mail::Location` class.
+     * @details This ensures that the `mail::Location` class is an abstract class and won't cause memory leak.
+     */
     virtual ~Location() = 0;
+    /*!
+     * @brief   `mail::Location::operator<` is a function that compares two locations.
+     * @details It compares two locations by comparing their string representations. This is to enable the use of `std::map`.
+     * @param   other The other location
+     * @return  `bool` `true` if the current location is less than the other location, `false` otherwise
+     */
     bool operator<(Location const &other) const
     {
         return (string)(*this) < (string)(other);
     }
+    /*!
+     * @brief   `mail::Location::operator==` is a function that compares two locations.
+     * @details It compares two locations by comparing their string representations. This is to enable the use of `std::map`.
+     * @param   other The other location
+     * @return  `bool` `true` if the current location is equal to the other location, `false` otherwise
+     */
+    bool operator==(Location const &other) const
+    {
+        return (string)(*this) == (string)(other);
+    }
+    /*!
+     * @brief   `mail::Location::operator string` is a pure virtual function that returns the string representation of the location.
+     */
     virtual operator string() const = 0;
+    /*!
+     * @brief   `mail::Location::to_string` is a pure virtual function that returns the string representation of the location with more information that suitable for human reading.
+     */
     virtual string to_string() const = 0;
 };
+/*!
+ * @brief   `mail::Location::~Location` is using the default destructor created by the compiler.
+ * @details This ensures that the use of `mail::Location` won't cause any linker error.
+ */
 Location::~Location() = default;
+/*!
+ * @brief   `mail::FromLocation` is a class that represents a location from a city.
+ */
 class FromLocation : public Location
 {
   protected:
+    /*!
+     * @brief   `mail::FromLocation::city` is a string that represents the city of the location.
+     */
     string city;
 
   public:
-    FromLocation(string const &city) : city(city)
+    /*!
+     * @brief   `mail::FromLocation::FromLocation` is a constructor that initializes the `mail::FromLocation` object.
+     */
+    FromLocation(string const &city) 
+        : city(city)
     {
     }
+    /*!
+     * @brief   `mail::FromLocation::~FromLocation` is using the default destructor created by the compiler.
+     * @details This ensures that the use of `mail::FromLocation` won't cause any linker error or memory leakage.
+     */
     virtual ~FromLocation() = default;
-
+    /*!
+     * @brief   `mail::FromLocation::operator string` is a function that returns the string representation of the location.
+     */
     virtual operator string() const override
     {
         return "{ " + this->city + " }";
     }
+    /*!
+     * @brief   `mail::FromLocation::to_string` is a function that returns the string representation of the location with more information.
+     */
     virtual string to_string() const override
     {
         return "From: { " + this->city + " }";
     }
 };
+/*!
+ * @brief   `mail::ToLocation` is a class that represents a location to a city.
+ */
 class ToLocation : public Location
 {
   protected:
+    /*!
+     * @brief   `mail::ToLocation::city` is a string that represents the city of the location.
+     */
     string city;
 
   public:
-    ToLocation(string const &city) : city(city)
+    /*!
+     * @brief   `mail::ToLocation::ToLocation` is a constructor that initializes the `mail::ToLocation` object.
+     * @param   city The city of the location
+     */
+    ToLocation(string const &city) 
+        : city(city)
     {
     }
+    /*!
+     * @brief   `mail::ToLocation::~ToLocation` is using the default destructor created by the compiler.
+     * @details This ensures that the use of `mail::ToLocation` won't cause any linker error or memory leakage.
+     */
     virtual ~ToLocation() = default;
-
+    /*!
+     * @brief   `mail::ToLocation::operator string` is a function that returns the string representation of the location.
+     */
     virtual operator string() const override
     {
         return "{ " + this->city + " }";
     }
+    /*!
+     * @brief   `mail::ToLocation::to_string` is a function that returns the string representation of the location with more information.
+     */
     virtual string to_string() const override
     {
         return "To: { " + this->city + " }";
     }
 };
-
+/*!
+ * @brief   `Route` is a type that represents a route from a location to another location.
+ */
 typedef pair<FromLocation, ToLocation> Route;
-
+/*!
+ * @brief   `mail::make_route` is a function that creates a route from a location to another location.
+ * @param   from The location from
+ * @param   to The location to
+ * @return  `mail::Route` The route from the location `from` to the location `to`
+ */
 Route make_route(FromLocation from, ToLocation to)
 {
     return make_pair(from, to);
 }
-
+/*!
+ * @brief   `mail::RouteToDistance` is a class that stores the distance between two locations and converts a route to its distance.
+ */
 class RouteToDistance
 {
   public:
@@ -178,15 +329,36 @@ class RouteToDistance
     typedef unsigned int DistanceType;
 
   protected:
+    /*!
+     * @brief   `mail::RouteToDistance::distance_map_init` is a function that reads the distance from file.
+     * @return  `std::map<mail::RouteToDistance::RouteType, mail::RouteToDistance::DistanceType>` The distance map
+     */
     static map<RouteType, DistanceType> distance_map_init();
-    static const string distance_map_filename;
+    /*!
+     * @brief   `mail::RouteToDistance::distance_map_filename` is a string that represents the filename of the distance map file in CSV format.
+     */
+    static string const distance_map_filename;
+    /*!
+     * @brief   `mail::RouteToDistance::distance_map` is a map that stores the distance between two locations.
+     */
     static map<RouteType, DistanceType> const distance_map;
 
   public:
+    /*!
+     * @brief   `mail::RouteToDistance::exists` is a function that checks if the route exists in the distance map.
+     * @param   route The route
+     * @return  `bool` `true` if the route exists in the distance map, `false` otherwise
+     */
     bool exists(RouteType const &route) const
     {
         return distance_map.find(route) != distance_map.end();
     }
+    /*!
+     * @brief   `mail::RouteToDistance::operator()` is a function that converts a route to its distance.
+     * @param   route The route to convert
+     * @return  `mail::RouteToDistance::DistanceType` The distance between the two locations in the route
+     * @throws  `std::out_of_range` If the route does not exist in the distance map
+     */
     DistanceType operator()(RouteType const &route) const
     {
         try
@@ -234,39 +406,83 @@ const string RouteToDistance::distance_map_filename = "distance.csv";
 const map<RouteToDistance::RouteType, RouteToDistance::DistanceType> RouteToDistance::distance_map =
     RouteToDistance::distance_map_init();
 
+/*!
+ * @brief   `mail::Centimeter` is a class that represents a length in centimeters.
+ */
 class Centimeter
 {
   public:
     typedef long double ValueType;
 
   private:
+    /*!
+     * @brief   `mail::Centimeter::value` is a value that represents the length in centimeters.
+     */
     ValueType value;
 
   public:
+    /*!
+     * @brief   `mail::Centimeter::Centimeter` is a constructor that initializes the `mail::Centimeter` object.
+     * @param   value A value not less than 0 that represents the length in centimeters
+     * @throws  `std::runtime_error` If the value is less than 0
+     */
     Centimeter(ValueType value = 0) : value(value >= 0 ? value : -1)
     {
         if (this->value == -1)
             throw runtime_error("Invalid centimeter value");
     }
+    /*!
+     * @brief   `mail::Centimeter::unit` is a function that returns the unit of the length.
+     * @return  `string` The unit of the length
+     */
     static string unit()
     {
         return "cm";
     }
+    /*!
+     * @brief   `mail::Centimeter::operator ValueType` is a function that converts the `mail::Centimeter` object to its value.
+     * @return  `mail::Centimeter::ValueType` The value of the `mail::Centimeter` object
+     */
     operator ValueType() const
     {
         return this->value;
     }
 };
 
+/*!
+ * @brief   `mail::Freight` is an abstract class that represents a freight.
+ * @example 
+ *  ```cpp
+ *  Freight const *freight = &air_freight;
+ *  long double volumetric_weight = freight->volumetric_weight(32, 24, 1, 1);
+ *  ```
+ */
 class Freight
 {
   public:
+    /*!
+     * @brief   `mail::Freight::~Freight` is a pure virtual destructor of the `mail::Freight` class.
+     * @details This ensures that the `mail::Freight` class is an abstract class and won't cause memory leak.
+     */
     virtual ~Freight() = 0;
-
-    virtual double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const = 0;
+    /*!
+     * @brief   `mail::Freight::volumetric_weight` is a pure virtual function that calculates the volumetric weight of this freight.
+     * @param   l The length of the package
+     * @param   w The width of the package 
+     * @param   h The height of the package
+     * @param   packages The number of packages
+     * @return  `long double` The volumetric weight of the freight
+     */
+    virtual long double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const = 0;
+    /*!
+     * @brief   `mail::Freight::operator string` is a pure virtual function that returns the string representation of the freight.
+     */
     virtual operator string() const = 0;
 };
-
+/*!
+ * @brief   `mail::Freight::~Freight` is using the default destructor created by the compiler.
+ * @details This ensures that the use of `mail::Freight` won't cause any linker error or memory leakage.
+ */
 Freight::~Freight() = default;
 
 class AirFreight : public Freight
@@ -274,7 +490,7 @@ class AirFreight : public Freight
   public:
     virtual ~AirFreight() = default;
 
-    virtual double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
+    virtual long double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
     {
         return l * w * h / 6000.0 * packages;
     }
@@ -289,7 +505,7 @@ class OceanFreight : public Freight
   public:
     virtual ~OceanFreight() = default;
 
-    virtual double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
+    virtual long double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
     {
         return l * w * h / 1000.0 * packages;
     }
@@ -304,7 +520,7 @@ class RailFreight : public Freight
   public:
     virtual ~RailFreight() = default;
 
-    virtual double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
+    virtual long double volumetric_weight(Centimeter l, Centimeter w, Centimeter h, unsigned int packages) const override
     {
         return l * w * h / 3000.0 * packages;
     }
