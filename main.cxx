@@ -8,8 +8,9 @@ namespace csv
 class Parser
 {
   private:
-    vector<string> m_title_fields;
     typedef vector<string> record_type;
+    typedef vector<string> title_type;
+    title_type m_title_fields;
     vector<record_type> m_data;
 
     struct string_trim_result
@@ -25,7 +26,7 @@ class Parser
     {
     }
     void add_records(string const &data_str);
-    vector<string> const &titles() const
+    title_type const &titles() const
     {
         return m_title_fields;
     }
